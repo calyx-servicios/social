@@ -58,41 +58,48 @@ class Mail(models.Model):
         res["email_cc"] = self.send_get_mail_cc(partner)
         return res
 
-    @api.multi
-    def _postprocess_sent_message(self, mail_sent=True):
-        _logger.debug(
-            "postprocess_sent_message model?: %r ", self.model
-        )
-        if self.model == "account.invoice":
-            _logger.debug("account invoice id?: %r ", self.res_id)
+    # NOTE
+    # This functions was deprecated but could be useful in the future
 
-            invoice = self.env["account.invoice"].browse(self.res_id)
+    # @api.multi
+    # def _postprocess_sent_message(self, mail_sent=True):
+    #    """This function adds a little log in account.invoice notes,
+    #    this shows the email addresses to which the emails were sent
+    #    """
+    #     _logger.debug(
+    #         "postprocess_sent_message model?: %r ", self.model
+    #     )
+    #     if self.model == "account.invoice":
+    #         _logger.debug("account invoice id?: %r ", self.res_id)
 
-            msg = ""
-            email_list = []
-            if self.email_to:
-                email_list.append(self.send_get_email_dict())
-            for partner in self.recipient_ids:
-                email_list.append(
-                    self.send_get_email_dict(partner=partner)
-                )
-            for email in email_list[:1]:
-                for mail in email.get("email_to"):
-                    if len(msg) > 0:
-                        msg += ","
-                    msg = msg + mail
-                for mail in email.get("email_cc"):
-                    if len(msg) > 0:
-                        msg += ","
-                    msg = msg + mail
-            msg = "Enviado a:" + msg
-            _logger.debug("account invoice message post?: %r ", msg)
-            invoice.message_post(body=msg)
-        res = super(Mail, self)._postprocess_sent_message(mail_sent)
-        return res
+    #         invoice = self.env["account.invoice"].browse(self.res_id)
+
+    #         msg = ""
+    #         email_list = []
+    #         if self.email_to:
+    #             email_list.append(self.send_get_email_dict())
+    #         for partner in self.recipient_ids:
+    #             email_list.append(
+    #                 self.send_get_email_dict(partner=partner)
+    #             )
+    #         for email in email_list[:1]:
+    #             for mail in email.get("email_to"):
+    #                 if len(msg) > 0:
+    #                     msg += ","
+    #                 msg = msg + mail
+    #             for mail in email.get("email_cc"):
+    #                 if len(msg) > 0:
+    #                     msg += ","
+    #                 msg = msg + mail
+    #         msg = "Enviado a:" + msg
+    #         _logger.debug("account invoice message post?: %r ", msg)
+    #         invoice.message_post(body=msg)
+    #     res = super(Mail, self)._postprocess_sent_message(mail_sent)
+    #     return res
 
     # We had to change this line: email_cc=tools.email_split(mail.email_cc),
     # It was here where odoo split cc chain in several emails.
+
     @api.multi
     def _send(
         self,
